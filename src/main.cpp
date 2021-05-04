@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
-#define USE_GHST
-//#define USE_CRSF
+//#define USE_GHST
+#define USE_CRSF
 //#define USE_SBUS
 ////#define USE_SRXL2
 
@@ -67,8 +67,8 @@ void userProvidedHandleVtxData(SrxlVtxData *pVtxData)
 
 #endif
 
-#define TRIGGER_WAIT_RAND_MIN_MS 200
-#define TRIGGER_WAIR_RAND_MAX_MS 350
+#define TRIGGER_WAIT_RAND_MIN_MS 200000
+#define TRIGGER_WAIR_RAND_MAX_MS 350000
 uint32_t TriggerBeginTime;
 
 #define GPIO_OUTPUT_PIN D0
@@ -110,7 +110,7 @@ void inline CRSF_GHST_RC_CALLBACK()
 
 void ICACHE_RAM_ATTR PreTrigger()
 {
-  TriggerBeginTime = random(TRIGGER_WAIT_RAND_MIN_MS, TRIGGER_WAIR_RAND_MAX_MS) + millis();
+  TriggerBeginTime = random(TRIGGER_WAIT_RAND_MIN_MS, TRIGGER_WAIR_RAND_MAX_MS) + micros();
   CurrState = 1;
 }
 
@@ -214,7 +214,7 @@ void loop()
   }
   else if (CurrState == 1)
   {
-    if (millis() > TriggerBeginTime)
+    if (micros() > TriggerBeginTime)
     {
       DoTrigger();
     }
