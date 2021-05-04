@@ -67,7 +67,7 @@ void SBUS::begin()
 	#elif defined(ARDUINO_SAMD_ZERO)		// Adafruit Feather M0
 		_bus->begin(_sbusBaud, SERIAL_8E2);
 	#else
-		Serial.begin(100000, SERIAL_8E2, SERIAL_FULL, 1, false);
+		Serial.begin(100000, SERIAL_8E2, SERIAL_FULL, 1, true);
   #endif
 }
 

@@ -1,11 +1,20 @@
 #include <Arduino.h>
+#include "SoftwareSerial.h"
 
-//#define USE_GHST
-#define USE_CRSF
+SoftwareSerial usbSerial;
+auto &testSerial = Serial;
+
+#define USE_GHST
+//#define USE_CRSF
 //#define USE_SBUS
 ////#define USE_SRXL2
 
+bool testRunning = false;
+#define NumOfTests 500
+uint32_t testCount = 0;
 uint16_t ChannelData[16];
+
+uint32_t latencyResult[NumOfTests] = {0};
 
 #ifdef USE_GHST
 #include "ghst.h"
@@ -76,26 +85,66 @@ uint32_t TriggerBeginTime;
 uint32_t BeginTriggerMicros;
 uint32_t StopTriggerMicros;
 
+uint32_t lastRCdataMicros;
+uint32_t currRCdataMicros;
+
 uint8_t CurrState;
 
-void ICACHE_RAM_ATTR PrintResults()
+void ICACHE_RAM_ATTR clear_array(uint32_t *array, uint32_t len)
 {
-  Serial.println(StopTriggerMicros - BeginTriggerMicros);
+  for (uint32_t i = 0; i < len; i++)
+    array[i] = 0;
 }
 
-void ICACHE_RAM_ATTR RCcallback(volatile uint16_t* data)
+double ICACHE_RAM_ATTR average(uint32_t *array, uint32_t len)
 {
-  //Serial.println(data[2]);
+  double sum = 0; // sum will be larger than an item, long for safety.
+  for (uint32_t i = 0; i < len; i++)
+  {
+    sum += array[i];
+  }
+  return ((double)sum / (double)len); // average will be fractional, so float may be appropriate.
+}
+
+void ICACHE_RAM_ATTR RCcallback(volatile uint16_t *data)
+{
+  uint32_t now = micros();
   if (CurrState == 2)
   {
     if (data[2] > 1000)
     {
       digitalWrite(D0, LOW);
-      StopTriggerMicros = micros();
-      PrintResults();
       CurrState = 0;
+      StopTriggerMicros = now;
+      uint32_t result = StopTriggerMicros - BeginTriggerMicros;
+
+      if (testRunning)
+      {
+        latencyResult[testCount] = result;
+        usbSerial.print(testCount);
+        usbSerial.print(",");
+        usbSerial.print(result);
+        usbSerial.print(",");
+        usbSerial.println(now - lastRCdataMicros);
+      }
+
+      if (testCount >= NumOfTests && testRunning)
+      {
+        testRunning = false;
+        testCount = 0;
+        usbSerial.println("===== FINISHED =====");
+        usbSerial.print("AVERAGE: ");
+        usbSerial.print(average(latencyResult, NumOfTests));
+        usbSerial.println(" microSeconds");
+        clear_array(latencyResult, sizeof(latencyResult));
+      }
+      else
+      {
+        testCount++;
+      }
     }
   }
+  lastRCdataMicros = now;
 }
 
 void inline CRSF_GHST_RC_CALLBACK()
@@ -105,24 +154,19 @@ void inline CRSF_GHST_RC_CALLBACK()
 #elif defined(USE_GHST)
   RCcallback(ghst.ChannelDataIn);
 #endif
-  
 }
 
-void ICACHE_RAM_ATTR PreTrigger()
+void inline PreTrigger()
 {
   TriggerBeginTime = random(TRIGGER_WAIT_RAND_MIN_MS, TRIGGER_WAIR_RAND_MAX_MS) + micros();
   CurrState = 1;
 }
 
-void ICACHE_RAM_ATTR DoTrigger()
+void inline DoTrigger()
 {
   digitalWrite(D0, HIGH);
   BeginTriggerMicros = micros();
   CurrState = 2;
-}
-
-void ICACHE_RAM_ATTR BeginTrigger()
-{
 }
 
 void setup()
@@ -130,8 +174,9 @@ void setup()
   pinMode(D0, OUTPUT);
   pinMode(D1, OUTPUT);
   digitalWrite(D1, LOW);
-
+  pinMode(0, INPUT_PULLUP);
   CurrState = 0;
+  clear_array(latencyResult, NumOfTests);
 
 #if defined(USE_CRSF)
   crsf.RCdataCallback = &CRSF_GHST_RC_CALLBACK;
@@ -145,7 +190,12 @@ void setup()
   sbus.begin();
 #endif
 
-Serial.println("begin");
+  Serial.swap();
+
+  usbSerial.begin(19200, SWSERIAL_8N1, 3, 1, false, 256);
+  usbSerial.enableIntTx(false);
+  usbSerial.println("Softserial Mon Started");
+  usbSerial.println("Press Button to Begin Test");
 }
 
 #ifdef USE_SBUS
@@ -229,4 +279,18 @@ void loop()
 #elif defined(USE_SBUS)
   loop_sbus();
 #endif
+
+  if (digitalRead(0) == 0)
+  {
+    {
+      usbSerial.println("Begin Test");
+      usbSerial.print("Test will run:");
+      usbSerial.print(NumOfTests);
+      usbSerial.println(" times");
+      testRunning = true;
+      testCount = 0;
+      clear_array(latencyResult, NumOfTests);
+      usbSerial.println("===== BEGIN =====");
+    }
+  }
 }

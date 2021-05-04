@@ -2,6 +2,9 @@
 #include "ghst.h"
 #include "HardwareSerial.h"
 
+#include "SoftwareSerial.h"
+extern SoftwareSerial usbSerial;
+
 volatile bool GHST::frameActive = false; //since we get a copy of the serial data use this flag to know when to ignore it
 
 void inline GHST::nullCallback(void){};
@@ -23,7 +26,7 @@ volatile uint16_t GHST::ChannelDataInPrev[16] = {0};
 
 void GHST::Begin()
 {
-    Serial.println("About to start GHST task...");
+    usbSerial.println("About to start GHST task...");
     //instance->_dev->begin(420000);
 }
 
@@ -85,7 +88,6 @@ void ICACHE_RAM_ATTR GHST::handleUARTin() //RTOS task to read and write CRSF pac
                 }
                 else
                 {
-                    Serial.println("UART CRC failure");
                     frameActive = false;
                     SerialInPacketPtr = 0;
                     SerialInPacketLen = 0;
@@ -107,7 +109,7 @@ bool ICACHE_RAM_ATTR GHST::ProcessPacket()
     if (CRSFstate == false)
     {
         CRSFstate = true;
-        Serial.println("GHST UART Connected");
+        usbSerial.println("GHST UART Connected");
         connected();
     }
 
@@ -124,7 +126,7 @@ bool ICACHE_RAM_ATTR GHST::ProcessPacket()
 
 void ICACHE_RAM_ATTR GHST::GetChannelDataIn() // data is packed as 11 bits per channel
 {
-    #define SERIAL_PACKET_OFFSET 3
+#define SERIAL_PACKET_OFFSET 3
     const ghstPayloadPulses_t *const rcChannels = (ghstPayloadPulses_t *)&SerialInBuffer[SERIAL_PACKET_OFFSET];
     ChannelDataIn[0] = rcChannels->ch1to4.ch1 >> 1;
     ChannelDataIn[1] = rcChannels->ch1to4.ch2 >> 1;

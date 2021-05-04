@@ -2,9 +2,8 @@
 #include "CRSF.h"
 #include "HardwareSerial.h"
 
-
-uint8_t CRSF::CSFR_TXpin_Module = -1;
-uint8_t CRSF::CSFR_RXpin_Module = -1; // Same pin for RX/TX
+#include "SoftwareSerial.h"
+extern SoftwareSerial usbSerial;
 
 volatile bool CRSF::ignoreSerialData = false;
 volatile bool CRSF::CRSFframeActive = false; //since we get a copy of the serial data use this flag to know when to ignore it
@@ -34,7 +33,7 @@ volatile uint32_t CRSF::RCdataLastRecv = 0;
 
 void CRSF::Begin()
 {
-    Serial.println("About to start CRSF task...");
+    usbSerial.println("About to start CRSF task...");
 }
 
 void ICACHE_RAM_ATTR CRSF::handleUARTin() //RTOS task to read and write CRSF packets to the serial port
@@ -98,7 +97,6 @@ void ICACHE_RAM_ATTR CRSF::handleUARTin() //RTOS task to read and write CRSF pac
                 }
                 else
                 {
-                    Serial.println("UART CRC failure");
                     CRSFframeActive = false;
                     SerialInPacketPtr = 0;
                     SerialInPacketLen = 0;
@@ -121,7 +119,7 @@ bool ICACHE_RAM_ATTR CRSF::ProcessPacket()
     if (CRSFstate == false)
     {
         CRSFstate = true;
-        Serial.println("CRSF UART Connected");
+        usbSerial.println("CRSF UART Connected");
         connected();
     }
 
