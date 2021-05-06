@@ -4,8 +4,8 @@
 SoftwareSerial usbSerial;
 auto &testSerial = Serial;
 
-#define USE_GHST
-//#define USE_CRSF
+//#define USE_GHST
+#define USE_CRSF
 //#define USE_SBUS
 ////#define USE_SRXL2
 

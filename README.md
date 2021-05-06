@@ -5,3 +5,9 @@ The following protocols are supported:
 CRSFv2
 GHST
 SBUS
+
+Connect like so, hit upload and mointor in platformIO then press the button on the board board to begin getting results 
+
+![Wiring](shitty_diagram.png)
+
+![Output Screenshot](screenshot.png)
