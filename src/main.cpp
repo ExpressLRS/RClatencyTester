@@ -7,6 +7,7 @@ auto &testSerial = Serial;
 //#define USE_GHST
 #define USE_CRSF
 //#define USE_SBUS
+//#define USE_IBUS
 ////#define USE_SRXL2
 
 bool testRunning = false;
@@ -31,6 +32,11 @@ CRSF crsf(Serial);
 SBUS sbus(Serial);
 bool failSafe;
 bool lostFrame;
+#endif
+
+#ifdef USE_IBUS
+#include "IBUS.h"
+IBUS ibus(Serial);
 #endif
 
 #ifdef USE_SRXL2
@@ -153,6 +159,8 @@ void inline CRSF_GHST_RC_CALLBACK()
   RCcallback(crsf.ChannelDataIn);
 #elif defined(USE_GHST)
   RCcallback(ghst.ChannelDataIn);
+#elif defined(USE_IBUS)
+  RCcallback(ibus.ChannelDataIn);
 #endif
 }
 
@@ -188,6 +196,8 @@ void setup()
   Serial.begin(GHST_RX_BAUDRATE, SERIAL_8N1, SERIAL_FULL, 1, false);
 #elif defined(USE_SBUS)
   sbus.begin();
+#elif defined(USE_IBUS)
+  ibus.RCdataCallback = &CRSF_GHST_RC_CALLBACK;
 #endif
 
   Serial.swap();
@@ -278,6 +288,8 @@ void loop()
   loop_srxl2();
 #elif defined(USE_SBUS)
   loop_sbus();
+#elif defined(USE_IBUS)
+  ibus.loop();
 #endif
 
   if (digitalRead(0) == 0)
