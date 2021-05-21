@@ -24,7 +24,7 @@ void IBUS::begin(Stream& stream)
     this->lchksum = 0;
 }
 
-void IBUS::loop(void)
+void ICACHE_RAM_ATTR IBUS::loop(void)
 {
     extern SoftwareSerial usbSerial;
     while (stream->available() > 0)
