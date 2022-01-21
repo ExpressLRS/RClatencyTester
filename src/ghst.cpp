@@ -115,7 +115,11 @@ bool ICACHE_RAM_ATTR GHST::ProcessPacket()
 
     //Serial.println(SerialInBuffer[2], HEX);
 
-    if (SerialInBuffer[2] >= GHST_UL_RC_CHANS_HS4_FIRST && SerialInBuffer[2] <= GHST_UL_RC_CHANS_HS4_LAST)
+    const uint8_t ghstFrameType = SerialInBuffer[2];
+    const bool scalingLegacy = ghstFrameType >= GHST_UL_RC_CHANS_HS4_FIRST && ghstFrameType <= GHST_UL_RC_CHANS_HS4_LAST;
+    const bool scaling12bit = ghstFrameType >= GHST_UL_RC_CHANS_HS4_12_FIRST && ghstFrameType <= GHST_UL_RC_CHANS_HS4_12_LAST;
+
+    if (scalingLegacy || scaling12bit)
     {
         GetChannelDataIn();
         (RCdataCallback)(); // run new RC data callback

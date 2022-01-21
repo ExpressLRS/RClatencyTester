@@ -27,15 +27,24 @@ typedef enum {
 } ghstAddr_e;
 
 typedef enum {
-    // frame types 0x10 - 0x1f always include 4 primary channels, plus either 4 aux channels,
-    // or other type-specific data. Expect types 0x14-0x1f to be added in the future, and even though
+    // frame types 0x10 - 0x1f always include 10bit 4 primary channels, plus either 4 aux channels,
+    // frame types 0x30 - 0x3f always include 12bit 4 primary channels, plus either 4 aux channels,
+    // or other type-specific data. Expect types 0x14-0x1f (0x34 - 0x3f) to be added in the future, and even though
     // not explicitly supported, the 4 primary channels should always be extracted.
-    GHST_UL_RC_CHANS_HS4_FIRST  = 0x10,     // First frame type including 4 primary channels
-    GHST_UL_RC_CHANS_HS4_5TO8   = 0x10,     // primary 4 channel, plus CH5-8
-    GHST_UL_RC_CHANS_HS4_9TO12  = 0x11,     // primary 4 channel, plus CH9-12
-    GHST_UL_RC_CHANS_HS4_13TO16 = 0x12,     // primary 4 channel, plus CH13-16
-    GHST_UL_RC_CHANS_HS4_RSSI   = 0x13,     // primary 4 channel, plus RSSI, LQ, RF Mode, and Tx Power
-    GHST_UL_RC_CHANS_HS4_LAST   = 0x1f      // Last frame type including 4 primary channels
+    GHST_UL_RC_CHANS_HS4_FIRST  = 0x10,     // 10 bit first frame
+    GHST_UL_RC_CHANS_HS4_5TO8   = 0x10,     // 10 bit primary 4 channel, plus CH5-8
+    GHST_UL_RC_CHANS_HS4_9TO12  = 0x11,     // 10 bit primary 4 channel, plus CH9-12
+    GHST_UL_RC_CHANS_HS4_13TO16 = 0x12,     // 10 bit primary 4 channel, plus CH13-16
+    GHST_UL_RC_CHANS_HS4_RSSI   = 0x13,     // 10 bit primary 4 channel, plus RSSI, LQ, RF Mode, and Tx Power
+    GHST_UL_RC_CHANS_HS4_LAST   = 0x1f,     // 10 bit last frame type
+
+    GHST_UL_RC_CHANS_HS4_12_FIRST  = 0x30,  // 12 bit first frame
+    GHST_UL_RC_CHANS_HS4_12_5TO8   = 0x30,  // 12 bit primary 4 channel, plus CH5-8
+    GHST_UL_RC_CHANS_HS4_12_9TO12  = 0x31,  // 12 bit primary 4 channel, plus CH9-12
+    GHST_UL_RC_CHANS_HS4_12_13TO16 = 0x32,  // 12 bit primary 4 channel, plus CH13-16
+    GHST_UL_RC_CHANS_HS4_12_RSSI   = 0x33,  // 12 bit primary 4 channel, plus RSSI, LQ, RF Mode, and Tx Power
+    GHST_UL_RC_CHANS_HS4_12_LAST   = 0x3f,  // 12 bit last frame type
+
 } ghstUl_e;
 
 #define GHST_UL_RC_CHANS_SIZE       12      // 1 (type) + 10 (data) + 1 (crc)
