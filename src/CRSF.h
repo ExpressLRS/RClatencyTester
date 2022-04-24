@@ -8,6 +8,7 @@
 #define PACKED __attribute__((packed))
 
 #define CRSF_RX_BAUDRATE 420000
+// #define CRSF_RX_BAUDRATE 1000000 // Required for testing 1kHz
 #define CRSF_OPENTX_FAST_BAUDRATE 400000
 #define CRSF_OPENTX_SLOW_BAUDRATE 115200 // Used for QX7 not supporting 400kbps
 #define CRSF_NUM_CHANNELS 16
