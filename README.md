@@ -23,10 +23,10 @@ Select the correct Hardware in your IDE
 
 | nodemcu Pin | Target                  | Wire Color | Note                                                             |
 |-------------|-------------------------|------------|------------------------------------------------------------------|
-| D0          | Remote Throttle Stick   | turquoise  | disconnect the Throttle stick from the PCB                       |
-| GND         | Remote Ground           | black      | any ground connection in your remote                             |
-| D7          | Receiver TX pad         | orange     | *RC output* pad of your Receiver                                 |
-| GND         | Receiver ground         | gray       | ./.                                                              |
+| D0          | Remote Throttle Stick   | orange     | disconnect the Throttle stick from the PCB                       |
+| GND         | Remote Ground           | gray       | any ground connection in your remote                             |
+| D7          | Receiver TX pad         | turquoise  | *RC output* pad of your Receiver                                 |
+| GND         | Receiver ground         | black      | ./.                                                              |
 | VU or 3V3   | Receiver voltage supply | red        | select the pad with the suitable voltage level for your receiver |
 
 ![wiring diagram](wiringDiagram.png)
