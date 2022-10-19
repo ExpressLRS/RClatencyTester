@@ -1,21 +1,29 @@
 #include <Arduino.h>
 #include "SoftwareSerial.h"
 
-SoftwareSerial usbSerial;
-auto &testSerial = Serial;
 
+/* User Setup */
 //#define USE_GHST
 #define USE_CRSF
 //#define USE_SBUS
 //#define USE_IBUS
-////#define USE_SRXL2
+//#define USE_SRXL2
+
+#define NumOfTests 500
+
+/* End User Setup */
+
+
+SoftwareSerial usbSerial;
+auto &testSerial = Serial;
 
 bool testRunning = false;
-#define NumOfTests 500
 uint32_t testCount = 0;
 uint16_t ChannelData[16];
 
 uint32_t latencyResult[NumOfTests] = {0};
+
+#define GPIO_OUTPUT_PIN D0
 
 #ifdef USE_GHST
 #include "ghst.h"
@@ -83,10 +91,10 @@ void userProvidedHandleVtxData(SrxlVtxData *pVtxData)
 #endif
 
 #define TRIGGER_WAIT_RAND_MIN_MS 200000
-#define TRIGGER_WAIR_RAND_MAX_MS 350000
+#define TRIGGER_WAIT_RAND_MAX_MS 350000
 uint32_t TriggerBeginTime;
 
-#define GPIO_OUTPUT_PIN D0
+
 
 uint32_t BeginTriggerMicros;
 uint32_t StopTriggerMicros;
@@ -119,7 +127,7 @@ void ICACHE_RAM_ATTR RCcallback(volatile uint16_t *data)
   {
     if (data[2] > 1000)
     {
-      digitalWrite(D0, LOW);
+      digitalWrite(GPIO_OUTPUT_PIN, LOW);
       CurrState = 0;
       StopTriggerMicros = now;
       uint32_t result = StopTriggerMicros - BeginTriggerMicros;
@@ -166,22 +174,22 @@ void inline CRSF_GHST_RC_CALLBACK()
 
 void inline PreTrigger()
 {
-  TriggerBeginTime = random(TRIGGER_WAIT_RAND_MIN_MS, TRIGGER_WAIR_RAND_MAX_MS) + micros();
+  TriggerBeginTime = random(TRIGGER_WAIT_RAND_MIN_MS, TRIGGER_WAIT_RAND_MAX_MS) + micros();
   CurrState = 1;
 }
 
 void inline DoTrigger()
 {
-  digitalWrite(D0, HIGH);
+  digitalWrite(GPIO_OUTPUT_PIN, HIGH);
   BeginTriggerMicros = micros();
   CurrState = 2;
 }
 
 void setup()
 {
-  pinMode(D0, OUTPUT);
-  pinMode(D1, OUTPUT);
-  digitalWrite(D1, LOW);
+  pinMode(GPIO_OUTPUT_PIN, OUTPUT);
+  //pinMode(D1, OUTPUT);        // not used
+  //digitalWrite(D1, LOW);      // not used
   pinMode(0, INPUT_PULLUP);
   CurrState = 0;
   clear_array(latencyResult, NumOfTests);
@@ -204,7 +212,7 @@ void setup()
 
   usbSerial.begin(19200, SWSERIAL_8N1, 3, 1, false, 256);
   usbSerial.enableIntTx(false);
-  usbSerial.println("Softserial Mon Started");
+  usbSerial.println("Softserial Monitor Started");
   usbSerial.println("Press Button to Begin Test");
 }
 
