@@ -40,7 +40,7 @@ void ICACHE_RAM_ATTR CRSF::handleUARTin() //RTOS task to read and write CRSF pac
 {
     volatile uint8_t *SerialInBuffer = CRSF::inBuffer.asUint8_t;
 
-    if (this->_dev->available())
+    while (this->_dev->available())
     {
         char inChar = this->_dev->read();
 
@@ -116,6 +116,8 @@ void ICACHE_RAM_ATTR CRSF::handleUARTin() //RTOS task to read and write CRSF pac
 
 bool ICACHE_RAM_ATTR CRSF::ProcessPacket()
 {
+    uint32_t now = micros();
+
     if (CRSFstate == false)
     {
         CRSFstate = true;
@@ -127,7 +129,7 @@ bool ICACHE_RAM_ATTR CRSF::ProcessPacket()
 
     if (packetType == CRSF_FRAMETYPE_RC_CHANNELS_PACKED)
     {
-        CRSF::RCdataLastRecv = micros();
+        CRSF::RCdataLastRecv = now;
         GetChannelDataIn();
         (RCdataCallback)(); // run new RC data callback
         return true;
@@ -143,4 +145,5 @@ void ICACHE_RAM_ATTR CRSF::GetChannelDataIn() // data is packed as 11 bits per c
     ChannelDataIn[1] = (rcChannels->ch1);
     ChannelDataIn[2] = (rcChannels->ch2);
     ChannelDataIn[3] = (rcChannels->ch3);
+    ChannelDataIn[4] = (rcChannels->ch4); // Arm aux is sent every packet
 }
